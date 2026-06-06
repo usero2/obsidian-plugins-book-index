@@ -58,7 +58,9 @@ When a word is found in multiple files, the plugin sorts the links based on *Rel
 
 *Note: Plain text matches for manually typed words receive a base score of `1`.*
 
-### UI Settings
+### UI & Formatting Settings
+- **Trim Numbers & Special Characters**: Automatically removes leading and trailing numbers or punctuation from extracted words (e.g., `# 1. Topic` becomes `Topic`). This keeps your index incredibly clean!
+- **Show Letter Headers**: Toggle the display of the alphabet headers (A, B, C...) above each index group. 
 - **Number of Link Columns**: Choose how many columns (1 to 4) to display the file links on the right side. If an entry has fewer links than your selected columns, it will automatically shrink and right-align perfectly!
 
 ## 💡 Examples & Tips

@@ -2,5 +2,7 @@
   "ruleHeadings": true,
   "ruleBoldItalic": true,
   "ruleCodeBlocks": true,
-  "linkColumns": 4
+  "linkColumns": 4,
+  "showHeaders": false,
+  "trimSpecialCharacters": true
 }

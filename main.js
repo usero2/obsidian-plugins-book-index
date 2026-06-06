@@ -4,7 +4,9 @@ const DEFAULT_SETTINGS = {
     ruleHeadings: true,
     ruleBoldItalic: true,
     ruleCodeBlocks: true,
-    linkColumns: 1
+    linkColumns: 1,
+    showHeaders: true,
+    trimSpecialCharacters: false
 }
 
 // Function to escape string for regex
@@ -77,12 +79,20 @@ class BookIndexPlugin extends obsidian.Plugin {
             
             const lowerContent = content.toLowerCase();
 
+            const processText = (text) => {
+                if (this.settings.trimSpecialCharacters) {
+                    // Remove leading and trailing non-letters (keeps Thai and other unicode letters intact)
+                    return text.replace(/^[^\p{L}\p{M}]+/u, '').replace(/[^\p{L}\p{M}]+$/u, '');
+                }
+                return text.trim();
+            };
+
             // 1. Auto-extract Headings
             if (this.settings.ruleHeadings) {
                 const headingRegex = /^#{1,6}\s+([^\n]+)$/gm;
                 let match;
                 while ((match = headingRegex.exec(content)) !== null) {
-                    const text = match[1].trim();
+                    const text = processText(match[1]);
                     // Limit length to avoid huge index terms
                     if (text.length > 0 && text.length < 100) addMatch(text, file, 50, getLineNumber(content, match.index));
                 }
@@ -93,7 +103,7 @@ class BookIndexPlugin extends obsidian.Plugin {
                 const boldItalicRegex = /(\*\*|__)([^\n]+?)\1|(\*|_)([^\n]+?)\3/g;
                 let match;
                 while ((match = boldItalicRegex.exec(content)) !== null) {
-                    const text = (match[2] || match[4]).trim();
+                    const text = processText(match[2] || match[4]);
                     if (text.length > 0 && text.length < 80) addMatch(text, file, 30, getLineNumber(content, match.index));
                 }
             }
@@ -103,7 +113,7 @@ class BookIndexPlugin extends obsidian.Plugin {
                 const codeRegex = /(`{1,3})([^\n]+?)\1/g;
                 let match;
                 while ((match = codeRegex.exec(content)) !== null) {
-                    const text = match[2].trim();
+                    const text = processText(match[2]);
                     if (text.length > 0 && text.length < 80) addMatch(text, file, 20, getLineNumber(content, match.index));
                 }
             }
@@ -159,7 +169,9 @@ class BookIndexPlugin extends obsidian.Plugin {
 
         for (const letter of sortedLetters) {
             const letterGroup = resultsContainer.createEl("div", { cls: "book-index-group" });
-            letterGroup.createEl("h3", { text: letter, cls: "book-index-letter" });
+            if (this.settings.showHeaders) {
+                letterGroup.createEl("h3", { text: letter, cls: "book-index-letter" });
+            }
             
             const entriesInGroup = grouped[letter].sort((a, b) => a.displayWord.toLowerCase().localeCompare(b.displayWord.toLowerCase()));
             
@@ -260,6 +272,26 @@ class BookIndexSettingTab extends obsidian.PluginSettingTab {
                 .setValue(this.plugin.settings.ruleCodeBlocks)
                 .onChange(async (value) => {
                     this.plugin.settings.ruleCodeBlocks = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        new obsidian.Setting(containerEl)
+            .setName('Show Letter Headers')
+            .setDesc('Show or hide the alphabet letter headers (A, B, C...) above each group.')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.showHeaders)
+                .onChange(async (value) => {
+                    this.plugin.settings.showHeaders = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        new obsidian.Setting(containerEl)
+            .setName('Trim Numbers & Special Characters')
+            .setDesc('Automatically remove numbers and punctuation from the beginning and end of extracted words (e.g., "1. Topic" becomes "Topic").')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.trimSpecialCharacters)
+                .onChange(async (value) => {
+                    this.plugin.settings.trimSpecialCharacters = value;
                     await this.plugin.saveSettings();
                 }));
 
