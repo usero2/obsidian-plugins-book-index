@@ -1,7 +1,7 @@
 {
   "ruleHeadings": true,
-  "ruleBoldItalic": true,
-  "ruleCodeBlocks": true,
+  "ruleBoldItalic": false,
+  "ruleCodeBlocks": false,
   "linkColumns": 4,
   "showHeaders": false,
   "trimSpecialCharacters": true

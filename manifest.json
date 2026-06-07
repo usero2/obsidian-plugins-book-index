@@ -1,7 +1,7 @@
 {
   "id": "book-index",
   "name": "Book Index",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "minAppVersion": "0.15.0",
   "description": "Creates a book-like index from words defined in a code block by searching your vault.",
 	"author": "usero2-endofday",

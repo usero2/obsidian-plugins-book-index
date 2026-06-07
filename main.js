@@ -41,22 +41,33 @@ class BookIndexPlugin extends obsidian.Plugin {
     async processBookIndex(source, el, ctx) {
         const container = el.createEl("div", { cls: "book-index-container" });
         
+        const controlsContainer = container.createEl("div", { cls: "book-index-controls" });
+        
         // Add search filter input
-        const searchInput = container.createEl("input", {
+        const searchInput = controlsContainer.createEl("input", {
             type: "text",
             placeholder: "Search index...",
             cls: "book-index-search"
         });
         
+        // Add refresh button
+        const refreshBtn = controlsContainer.createEl("button", {
+            text: "Refresh",
+            cls: "book-index-refresh"
+        });
+        
         const resultsContainer = container.createEl("div", { cls: "book-index-results" });
-        resultsContainer.createEl("div", { text: "Loading index...", cls: "book-index-loading" });
 
-        const manualWords = source.split("\n").map(w => w.trim()).filter(w => w.length > 0);
-        const files = this.app.vault.getMarkdownFiles();
-        const currentFilePath = ctx.sourcePath;
+        const renderIndex = async () => {
+            resultsContainer.empty();
+            resultsContainer.createEl("div", { text: "Loading index...", cls: "book-index-loading" });
 
-        // Results map: lowerWord -> { displayWord, files: Map<path, {file, score}> }
-        const results = new Map();
+            const manualWords = source.split("\n").map(w => w.trim()).filter(w => w.length > 0);
+            const files = this.app.vault.getMarkdownFiles();
+            const currentFilePath = ctx.sourcePath;
+
+            // Results map: lowerWord -> { displayWord, files: Map<path, {file, score}> }
+            const results = new Map();
 
         const addMatch = (word, file, score, lineNumber) => {
             const lower = word.toLowerCase();
@@ -81,8 +92,8 @@ class BookIndexPlugin extends obsidian.Plugin {
 
             const processText = (text) => {
                 if (this.settings.trimSpecialCharacters) {
-                    // Remove leading and trailing non-letters (keeps Thai and other unicode letters intact)
-                    return text.replace(/^[^\p{L}\p{M}]+/u, '').replace(/[^\p{L}\p{M}]+$/u, '');
+                    // Remove leading non-letters (keeps Thai and other unicode letters intact)
+                    return text.replace(/^[^\p{L}\p{M}]+/u, '');
                 }
                 return text.trim();
             };
@@ -207,6 +218,12 @@ class BookIndexPlugin extends obsidian.Plugin {
             }
         }
 
+            // Re-apply search filter if there's text
+            if (searchInput.value) {
+                searchInput.dispatchEvent(new Event('input'));
+            }
+        };
+
         // Search filter logic
         searchInput.oninput = (e) => {
             const query = e.target.value.toLowerCase();
@@ -229,6 +246,13 @@ class BookIndexPlugin extends obsidian.Plugin {
                 group.style.display = hasVisibleRow ? '' : 'none';
             });
         };
+
+        refreshBtn.onclick = () => {
+            renderIndex();
+        };
+
+        // Initial render
+        renderIndex();
     }
 }
 
@@ -287,7 +311,7 @@ class BookIndexSettingTab extends obsidian.PluginSettingTab {
 
         new obsidian.Setting(containerEl)
             .setName('Trim Numbers & Special Characters')
-            .setDesc('Automatically remove numbers and punctuation from the beginning and end of extracted words (e.g., "1. Topic" becomes "Topic").')
+            .setDesc('Automatically remove numbers and punctuation from the beginning of extracted words (e.g., "1. Topic" becomes "Topic").')
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.trimSpecialCharacters)
                 .onChange(async (value) => {

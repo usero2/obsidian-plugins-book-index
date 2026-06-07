@@ -71,6 +71,17 @@ Create a new note called `Master Index.md` and place the `book-index` block insi
 ### Example 2: Ignoring URLs
 Don't worry about URLs messing up your index! The plugin has built-in smart filtering that ignores URLs. So if you have `_` inside a Google Drive link, it won't be accidentally extracted as italic text.
 
+## 🆕 Version History
+
+### v1.0.1
+- **Live Refresh Button**: Added a dedicated `Refresh` button next to the search bar. Instantly rebuild your index when other files change without needing to close and reopen the note.
+- **Improved Special Character Trimming**: The "Trim Numbers & Special Characters" setting has been optimized to only trim characters from the *beginning* of words, preserving important trailing characters.
+
+### v1.0.0
+- Initial Release!
+- Auto-Extraction Rules (Headings, Bold/Italic, Code Blocks).
+- Live Search Filter and Multi-Column Layouts.
+
 ## ❤️ Support & Donate
 
 If this plugin has improved your Obsidian workflow, saved you time, or you just want to support its continued development, please consider donating! 
